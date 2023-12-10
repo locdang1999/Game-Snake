@@ -5,6 +5,9 @@ class snake {
     this.y = GAME_HEIGHT / 2;
 
     this.angle = 0;
+    this.tailPosition = [];
+    this.eye = new eye(this);
+    this.createTail();
 
     this.listenMouseEvent();
   }
@@ -27,11 +30,55 @@ class snake {
     );
   }
 
+  createTail() {
+    for (let i = 0; i < 200; i++) {
+      this.tailPosition.push({
+        x: this.x - i * SNAKE_SPEED,
+        y: this.y,
+      });
+    }
+  }
+
   update() {
-    this.x++;
+    // Update position
+    // this.x++;
+    let newTailPosition = {
+      x: (this.x += Math.cos(this.angle) * SNAKE_SPEED),
+      y: (this.y += Math.sin(this.angle) * SNAKE_SPEED),
+    };
+
+    this.tailPosition.unshift(newTailPosition);
+    this.tailPosition.pop();
+
+    this.x = newTailPosition.x;
+    this.y = newTailPosition.y;
   }
 
   draw() {
-    this.game.screen.drawCircle({ x: this.x, y: this.y });
+    // Draw shadow
+    for (let i = this.tailPosition.length - 1; i > 1; i--) {
+      this.game.screen.drawCircle(
+        { x: this.tailPosition[i].x, y: this.tailPosition[i].y },
+        "shadow"
+      );
+    }
+
+    // Draw body
+    for (let i = this.tailPosition.length - 1; i > 1; i--) {
+      if (i % 8 != 0) {
+        continue;
+      }
+      this.game.screen.drawCircle(
+        { x: this.tailPosition[i].x, y: this.tailPosition[i].y },
+        "snake"
+      );
+      // this.game.screen.drawCircle({ x: pos.x, y: pos.y }, "snake");
+    }
+
+    // Draw head
+    this.game.screen.drawCircle({ x: this.x, y: this.y }, "snake");
+
+    // Draw eyes
+    this.eye.draw();
   }
 }
